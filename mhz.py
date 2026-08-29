@@ -222,6 +222,7 @@ for target_model in target_models:
 
     box_text = box_text.strip()
 
+    #Displays the Solv source amplitude
     #plt.gca().text(0.05, 0.05, box_text, transform=plt.gca().transAxes, fontsize=10,
                    #verticalalignment='bottom', horizontalalignment='left',
                    #bbox=dict(boxstyle='round,pad=0.5', facecolor='white', edgecolor='black', alpha=0.9))
