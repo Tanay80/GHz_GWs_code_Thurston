@@ -180,7 +180,7 @@ for target_model in target_models:
         #plt.ylim(-20, 50)
     else:
         plt.ylabel(r"$\left(\Omega_\text{Model} - \Omega_{\mathbb{R} \times \mathbb{R}^2 / S^2} \right) / \Omega_{\mathbb{R} \times \mathbb{R}^2 / S^2}$")
-        plt.xlim(8, 9.5)
+        #plt.xlim(8, 9.5)
         plt.ylim(0, 6.0e-16)
         
         if target_model == 'UH2':
