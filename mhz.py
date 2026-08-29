@@ -7,7 +7,7 @@ import warnings
 MPl = 1
 HI = (1e-5) * MPl
 L = 1e26
-l = 2.0
+l = 3.0
 j = 1j
 
 f_array = np.logspace(3, 10, 50) 
@@ -176,10 +176,12 @@ for target_model in target_models:
                  color='yellow', label='Pure Tensor Vacuum', linestyle='--')
             
         plt.ylabel(r"$\log_{10}(h_0^2 \Omega_{GW})$")
-        plt.title(r"$\mathbb{R} \times \mathbb{H}^2 / S^2 \left(\ell = 2.0 \right)$")
+        #plt.title(r"$\mathbb{R} \times \mathbb{H}^2 / S^2 \left(\ell = 2.0 \right)$")
         #plt.ylim(-20, 50)
     else:
-        plt.ylabel(r"Fractional difference $\left(\frac{\Delta \Omega_{GW}}{\Omega_{GW}}\right)$")
+        plt.ylabel(r"$\left(\Omega_\text{Model} - \Omega_{\mathbb{R} \times \mathbb{R}^2 / S^2} \right) / \Omega_{\mathbb{R} \times \mathbb{R}^2 / S^2}$")
+        plt.xlim(8, 9.5)
+        plt.ylim(0, 6.0e-16)
         
         if target_model == 'UH2':
             display_name = r"$\widetilde{U \left(\mathbb{H}^2 \right)}$"
@@ -187,7 +189,7 @@ for target_model in target_models:
             display_name = target_model
 
         #plt.title(f"Deviation of {display_name} geometry from FLRW")
-        plt.title(r"Common deviation of $\widetilde{U \left(\mathbb{H}^2 \right)}$, Nil & Solv from FLRW $\left(\ell = 2.0 \right)$")
+        #plt.title(r"Common deviation of $\widetilde{U \left(\mathbb{H}^2 \right)}$, Nil & Solv from FLRW $\left(\ell = 2.0 \right)$")
 
     k_box = 2*np.pi*f_array[0]
     A_box = 1
@@ -223,13 +225,11 @@ for target_model in target_models:
     box_text = box_text.strip()
 
     #Displays the Solv source amplitude
-    #plt.gca().text(0.05, 0.05, box_text, transform=plt.gca().transAxes, fontsize=10,
-                   #verticalalignment='bottom', horizontalalignment='left',
-                   #bbox=dict(boxstyle='round,pad=0.5', facecolor='white', edgecolor='black', alpha=0.9))
+    plt.gca().text(0.05, 0.05, box_text, transform=plt.gca().transAxes, fontsize=10,
+                   verticalalignment='bottom', horizontalalignment='left',
+                   bbox=dict(boxstyle='round,pad=0.5', facecolor='white', edgecolor='black', alpha=0.9))
 
     plt.grid(True)
     plt.legend()
     plt.savefig(f'mhz_{target_model}.png', dpi=300, bbox_inches='tight')
     plt.close()
-
-print("All plots generated and saved successfully!")

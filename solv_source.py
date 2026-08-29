@@ -1,3 +1,5 @@
+#This script plots the varioation of Solv geometry's source term against the parameter 'c' for each value of 'l'
+
 import matplotlib.pyplot as plt
 
 c_vals = [3.3, 3.45, 3.6]

@@ -1,3 +1,5 @@
+#A simple script to calculate EM field tensors and F^2 term used by me in the calculations
+
 import sympy as sp
 
 t, x, y, z = sp.symbols('t x y z')
