@@ -4,12 +4,10 @@ import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 import warnings
 
-#warnings.filterwarnings('ignore')
-
 MPl = 1
 HI = (1e-5) * MPl
-L = 1e7
-l = 3
+L = 1e26
+l = 2.0
 j = 1j
 
 f_array = np.logspace(3, 10, 50) 
@@ -18,6 +16,8 @@ colors = ['red', 'blue', 'green']
 
 def calculate_Y(model_name, c_val, f_array):
     Y_vals = []
+    N_tot = (l / 8) * (c_val**2 - 2)
+    
     for f in f_array:
         k = 2*np.pi*f  
         if model_name == 'RH2S2':
@@ -35,103 +35,106 @@ def calculate_Y(model_name, c_val, f_array):
 
         Omega = np.sqrt(k**2 - W)
         Omega_over_k = Omega/k
-        z = (1e-10)*k
-        tau = -z/Omega
-
-#---------------------------------------------------------------------------------------------
-        def hankel1(nu_val, x):
-            return special.hankel1(nu_val, x)
-
-        def hankel2(nu_val, x):
-            return special.hankel2(nu_val, x)
-
-#---------------------------------------------------------------------------------------------
-        def calculate_nu(z_p):
-            log_term = np.log(z/z_p)
-            denom = l - 4*log_term
-            if denom <= 0:
-                return 0.0 
-            return c_val*np.sqrt((2*l) / denom) - 0.5
-
-#---------------------------------------------------------------------------------------------
-        def G_func(tau_p):
-            z_p = -tau_p * Omega
-            nu_val = calculate_nu(z_p)
-            nu_plus = nu_val + 1
-            nu_minus = nu_val - 1
-
-            Green_num = k * np.sqrt(tau * tau_p) * (hankel1(nu_val, -k * tau_p) * hankel2(nu_val, -k * tau) - hankel1(nu_val, -k * tau) * hankel2(nu_val, -k * tau_p))
-            Green_denom = 0.5 * k * tau * hankel1(nu_val, -k * tau) * (hankel2(nu_plus, -k * tau) -  hankel2(nu_minus, -k * tau)) - nu_val * hankel1(nu_val, -k * tau) * hankel2(nu_val,  -k * tau) - (k * tau) * hankel1(nu_plus, -k * tau) * hankel2(nu_val, -k * tau)
-                
-            return Green_num / Green_denom
-
-#---------------------------------------------------------------------------------------------
-        def Integrand_func(z_p):
-            nu_val = calculate_nu(z_p)
-            if nu_val <= 2.5:
-                return 0.0
-            
-            q_inv_val = z*np.exp((l/8)*(c_val**2 - 2))
-            gamma_term = special.gamma(nu_val + 0.5)                               
-            
-            term1 = ((2**(2*nu_val - 1)) * (gamma_term**2)) / np.sqrt(nu_val - 2)
-            term2 = (q_inv_val)**(nu_val - 2)
-            term3 = (z_p)**(-2*nu_val + 3)
-
-            return term1 * term2 * term3
-
-#---------------------------------------------------------------------------------------------
-        def complex_quad(func, a, b):
-            real_integral = integrate.quad(lambda x: np.real(func(x)), a, b, limit=200)[0]
-            imag_integral = integrate.quad(lambda x: np.imag(func(x)), a, b, limit=200)[0]
-            return real_integral + 1j * imag_integral
-
-        nu_z = calculate_nu(z)
-        q_inv = z*np.exp((l/8) * (c_val**2 - 2))
-
-        C = (0.5-nu_z)/((k*q_inv)**2)
-        A = 1
-
-#---------------------------------------------------------------------------------------------
-        if model_name == 'Solv':
-            S = (2*j*C*k1*(k3**3)*A) / (L + 2*j*C*k3)                              
-        else:
-            S = 0                                                                  
-        
-        if f == f_array[0] and c_val == c_values[0]:
-            geom_dev = np.abs(W)/(k**2) if W != 0 else 0.0
-            source_mod = np.abs(S)
-            print(f"Model: {model_name:<5} | Geometric Deviation (|W|/k^2): {geom_dev:.5e} | Source Modification (|S|): {source_mod:.5e}")
-
-#---------------------------------------------------------------------------------------------
-        try:
-            PI = complex_quad(lambda tau_p: G_func(tau_p) * S, -100, np.abs(tau))
-        except Exception:
-            PI = 0
-
-#---------------------------------------------------------------------------------------------
-        S_bar_denom = (1 / np.sqrt(2 * k)) * np.sqrt(-np.pi * k * tau / 2) * hankel1(nu_z, -k * tau)
-        if S_bar_denom != 0:
-            S_bar = PI / S_bar_denom
-        else:
-            S_bar = 0
-
+        z = (9.1e-11)*k
         Pvk = 2*Omega_over_k*(HI/(np.pi * MPl))**2
-        Psk_factor = ((4/3)**2)*((1/Omega_over_k)**3)*((HI/MPl)**4)
+        Ne_minus_Nk = -np.log(z)
+        in_valid_window = (0 <= Ne_minus_Nk <= N_tot)
+        
+        if in_valid_window:
+        
+            tau = -z/Omega
 
 #---------------------------------------------------------------------------------------------
-        z_cutoff = z * np.exp((l / 4) * ((2 * c_val**2 / 9) - 1))                           #Obtained from nu(min) = 2.5
-        try:
-            pts = [z_cutoff] if z < z_cutoff < np.abs(Omega_over_k) else None
-            Integral = integrate.quad(Integrand_func, z, np.abs(Omega_over_k), points=pts, limit=500)[0]
-        except Exception:
-            Integral = 0
+            def hankel1(nu_val, x):
+                return special.hankel1(nu_val, x)
+
+            def hankel2(nu_val, x):
+                return special.hankel2(nu_val, x)
 
 #---------------------------------------------------------------------------------------------
-        Psk_source = (np.abs(1 + S_bar))**4
-        Psk = Psk_factor * (np.abs(Integral)**2) * Psk_source
+            def calculate_nu(z_p):
+                log_term = np.log(z/z_p)
+                denom = l - 4*log_term
+                if denom <= 0:
+                    return 0.0 
+                return c_val*np.sqrt((2*l) / denom) - 0.5
+
+#---------------------------------------------------------------------------------------------
+            def G_func(tau_p):
+                z_p = -tau_p * Omega
+                nu_val = calculate_nu(z_p)
+                nu_plus = nu_val + 1
+                nu_minus = nu_val - 1
+
+                Green_num = k * np.sqrt(tau * tau_p) * (hankel1(nu_val, -k * tau_p) * hankel2(nu_val, -k * tau) - hankel1(nu_val, -k * tau) * hankel2(nu_val, -k * tau_p))
+                Green_denom = 0.5 * k * tau * hankel1(nu_val, -k * tau) * (hankel2(nu_plus, -k * tau) -  hankel2(nu_minus, -k * tau)) - nu_val * hankel1(nu_val, -k * tau) * hankel2(nu_val,  -k * tau) - (k * tau) * hankel1(nu_plus, -k * tau) * hankel2(nu_val, -k * tau)
+                
+                return Green_num / Green_denom        
+
+#---------------------------------------------------------------------------------------------
+            def Integrand_func(z_p):
+                nu_val = calculate_nu(z_p)
+                if nu_val <= 2.5:
+                    return 0.0
+            
+                q_inv_val = z*np.exp((l/8)*(c_val**2 - 2))
+                gamma_term = special.gamma(nu_val + 0.5)                               
+            
+                term1 = ((2**(2*nu_val - 1)) * (gamma_term**2)) / np.sqrt(nu_val - 2)
+                term2 = (q_inv_val)**(nu_val - 2)
+                term3 = (z_p)**(-2*nu_val + 3)
+
+                return term1 * term2 * term3
+
+#---------------------------------------------------------------------------------------------
+            def complex_quad(func, a, b):
+                real_integral = integrate.quad(lambda x: np.real(func(x)), a, b, limit=200)[0]
+                imag_integral = integrate.quad(lambda x: np.imag(func(x)), a, b, limit=200)[0]
+                return real_integral + 1j * imag_integral
+
+            nu_z = calculate_nu(z)
+            q_inv = z*np.exp((l/8) * (c_val**2 - 2))
+
+            C = (0.5-nu_z)/((k*q_inv)**2)
+            A = 1
+
+#---------------------------------------------------------------------------------------------
+            if model_name == 'Solv':
+                S = (2*j*C*k1*(k3**3)*A) / (L + 2*j*C*k3)                              
+            else:
+                S = 0                                                                  
+        
+            if f == f_array[0] and c_val == c_values[0]:
+                geom_dev = np.abs(W)/(k**2) if W != 0 else 0.0
+                source_mod = np.abs(S)
+                print(f"Model: {model_name:<5} | Geometric Deviation (|W|/k^2): {geom_dev:.5e} | Source Modification (|S|): {source_mod:.5e}")
+
+#---------------------------------------------------------------------------------------------
+            try:
+                PI = complex_quad(lambda tau_p: G_func(tau_p) * S, -100, np.abs(tau))
+            except Exception:
+                PI = 0
+
+#---------------------------------------------------------------------------------------------
+            S_bar_denom = (1 / np.sqrt(2 * k)) * np.sqrt(-np.pi * k * tau / 2) * hankel1(nu_z, -k * tau)
+            S_bar = PI / S_bar_denom
+            Psk_factor = ((4/3)**2)*((1/Omega_over_k)**3)*((HI/MPl)**4)
+
+#---------------------------------------------------------------------------------------------
+            z_cutoff = z * np.exp((l / 4) * ((2 * c_val**2 / 9) - 1))                           #Obtained from nu(min) = 2.5
+            try:
+                pts = [z_cutoff] if z < z_cutoff < np.abs(Omega_over_k) else None
+                Integral = integrate.quad(Integrand_func, z, np.abs(Omega_over_k), points=pts, limit=500)[0]
+            except Exception:
+                Integral = 0
+
+#---------------------------------------------------------------------------------------------
+            Psk_source = (np.abs(1 + S_bar))**4
+            Psk = Psk_factor * (np.abs(Integral)**2) * Psk_source    
+        else:
+            Psk = 0.0
+        
         Pk = Pvk + Psk
-
 #---------------------------------------------------------------------------------------------
         h0 = 0.7
         OmR = 1e-5
@@ -173,7 +176,8 @@ for target_model in target_models:
                  color='yellow', label='Pure Tensor Vacuum', linestyle='--')
             
         plt.ylabel(r"$\log_{10}(h_0^2 \Omega_{GW})$")
-        plt.title(r"$\mathbb{R} \times \mathbb{H}^2 / S^2$")
+        plt.title(r"$\mathbb{R} \times \mathbb{H}^2 / S^2 \left(\ell = 2.5 \right)$")
+        #plt.ylim(-20, 50)
     else:
         plt.ylabel(r"Fractional difference $\left(\frac{\Delta \Omega_{GW}}{\Omega_{GW}}\right)$")
         
@@ -183,6 +187,7 @@ for target_model in target_models:
             display_name = target_model
 
         plt.title(f"Deviation of {display_name} geometry from FLRW")
+        #plt.title(r"Common deviation of $\widetilde{U \left(\mathbb{H}^2 \right)}$, Nil & Solv from FLRW $\left(\ell = 2.5 \right)$")
 
     k_box = 2*np.pi*f_array[0]
     A_box = 1
@@ -204,7 +209,7 @@ for target_model in target_models:
 #---------------------------------------------------------------------------------------------
     for c_val_box in c_values:
         nu_box = c_val_box * np.sqrt(2) - 0.5                   #Baseline (boundary) value (at z-prime = z)
-        z_box = 1e-10 * k_box
+        z_box = 9.1e-11 * k_box
         q_inv_box = z_box * np.exp((l/8)*(c_val_box**2 - 2))
         C_box = (0.5 - nu_box) / ((k_box * q_inv_box)**2)
         
