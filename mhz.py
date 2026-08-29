@@ -176,7 +176,7 @@ for target_model in target_models:
                  color='yellow', label='Pure Tensor Vacuum', linestyle='--')
             
         plt.ylabel(r"$\log_{10}(h_0^2 \Omega_{GW})$")
-        plt.title(r"$\mathbb{R} \times \mathbb{H}^2 / S^2 \left(\ell = 2.5 \right)$")
+        plt.title(r"$\mathbb{R} \times \mathbb{H}^2 / S^2 \left(\ell = 2.0 \right)$")
         #plt.ylim(-20, 50)
     else:
         plt.ylabel(r"Fractional difference $\left(\frac{\Delta \Omega_{GW}}{\Omega_{GW}}\right)$")
@@ -186,8 +186,8 @@ for target_model in target_models:
         else:
             display_name = target_model
 
-        plt.title(f"Deviation of {display_name} geometry from FLRW")
-        #plt.title(r"Common deviation of $\widetilde{U \left(\mathbb{H}^2 \right)}$, Nil & Solv from FLRW $\left(\ell = 2.5 \right)$")
+        #plt.title(f"Deviation of {display_name} geometry from FLRW")
+        plt.title(r"Common deviation of $\widetilde{U \left(\mathbb{H}^2 \right)}$, Nil & Solv from FLRW $\left(\ell = 2.0 \right)$")
 
     k_box = 2*np.pi*f_array[0]
     A_box = 1
@@ -222,9 +222,9 @@ for target_model in target_models:
 
     box_text = box_text.strip()
 
-    plt.gca().text(0.05, 0.05, box_text, transform=plt.gca().transAxes, fontsize=10,
-                   verticalalignment='bottom', horizontalalignment='left',
-                   bbox=dict(boxstyle='round,pad=0.5', facecolor='white', edgecolor='black', alpha=0.9))
+    #plt.gca().text(0.05, 0.05, box_text, transform=plt.gca().transAxes, fontsize=10,
+                   #verticalalignment='bottom', horizontalalignment='left',
+                   #bbox=dict(boxstyle='round,pad=0.5', facecolor='white', edgecolor='black', alpha=0.9))
 
     plt.grid(True)
     plt.legend()
