@@ -1,3 +1,5 @@
+#This scipt plots the GW spectrum with frequency on the top of reference PLICs contours
+
 import numpy as np
 import scipy.special as special
 import scipy.integrate as integrate
@@ -7,11 +9,24 @@ import warnings
 MPl = 1
 HI = (1e-5) * MPl
 L = 1e26
-l = 3.0
 j = 1j
 
+#----------------------------------------
+#Set-1
+l = 2.0
+c_values = [3.60, 3.45, 3.30]
+
+#Set-2
+#l = 4.0
+#c_values = [3.1, 3.0, 2.9]
+
+#Set-3
+#l = 6.0
+#c_values = [2.9, 2.8, 2.7]
+#----------------------------------------
+
 f_array = np.logspace(3, 10, 50) 
-c_values = [3.6, 3.45, 3.3]
+
 colors = ['red', 'blue', 'green']
 
 def calculate_Y(model_name, c_val, f_array):
@@ -180,8 +195,8 @@ for target_model in target_models:
         #plt.ylim(-20, 50)
     else:
         plt.ylabel(r"$\left(\Omega_\text{Model} - \Omega_{\mathbb{R} \times \mathbb{R}^2 / S^2} \right) / \Omega_{\mathbb{R} \times \mathbb{R}^2 / S^2}$")
-        #plt.xlim(8, 9.5)
-        plt.ylim(0, 6.0e-16)
+        #plt.xlim(7.5, 9.5)
+        #plt.ylim(0, 6.5e-16)
         
         if target_model == 'UH2':
             display_name = r"$\widetilde{U \left(\mathbb{H}^2 \right)}$"
@@ -225,9 +240,9 @@ for target_model in target_models:
     box_text = box_text.strip()
 
     #Displays the Solv source amplitude
-    plt.gca().text(0.05, 0.05, box_text, transform=plt.gca().transAxes, fontsize=10,
-                   verticalalignment='bottom', horizontalalignment='left',
-                   bbox=dict(boxstyle='round,pad=0.5', facecolor='white', edgecolor='black', alpha=0.9))
+    #plt.gca().text(0.05, 0.05, box_text, transform=plt.gca().transAxes, fontsize=10,
+                   #verticalalignment='bottom', horizontalalignment='left',
+                   #bbox=dict(boxstyle='round,pad=0.5', facecolor='white', edgecolor='black', alpha=0.9))
 
     plt.grid(True)
     plt.legend()
